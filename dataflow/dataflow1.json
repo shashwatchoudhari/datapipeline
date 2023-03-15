@@ -1,0 +1,93 @@
+{
+	"name": "dataflow1",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "ADLS_LS",
+						"type": "LinkedServiceReference"
+					},
+					"name": "OrderCSV"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ADLS_JSON_DATAFLOW",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "usingselect"
+				},
+				{
+					"name": "filter"
+				},
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "aggregate1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          Region as string,",
+				"          Country as string,",
+				"          ItemType as string,",
+				"          SalesChannel as string,",
+				"          OrderPriority as string,",
+				"          OrderID as integer,",
+				"          UnitsSold as short,",
+				"          UnitPrice as double,",
+				"          UnitCost as double,",
+				"          TotalRevenue as double,",
+				"          TotalCost as double,",
+				"          TotalProfit as double",
+				"     ),",
+				"     useSchema: false,",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'delimited',",
+				"     fileSystem: 'landing',",
+				"     fileName: 'Order.csv',",
+				"     columnDelimiter: ',',",
+				"     escapeChar: '\\\\',",
+				"     quoteChar: '\\\"',",
+				"     columnNamesAsHeader: true) ~> OrderCSV",
+				"OrderCSV select(mapColumn(",
+				"          New_Region = Region,",
+				"          Country,",
+				"          ItemType,",
+				"          SalesChannel,",
+				"          OrderPriority,",
+				"          OrderID,",
+				"          UnitsSold,",
+				"          UnitPrice,",
+				"          UnitCost,",
+				"          TotalRevenue,",
+				"          TotalCost",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> usingselect",
+				"usingselect filter(SalesChannel=='Online') ~> filter",
+				"filter derive(FlagIndia = Country=='India') ~> derivedColumn1",
+				"derivedColumn1 aggregate(groupBy(Country),",
+				"     TotalUnitSold = sum(UnitsSold)) ~> aggregate1",
+				"aggregate1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1"
+			]
+		}
+	}
+}

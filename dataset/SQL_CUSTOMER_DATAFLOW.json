@@ -1,0 +1,17 @@
+{
+	"name": "SQL_CUSTOMER_DATAFLOW",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "SQL_LS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "salesLt",
+			"table": "CustomerAssi7"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
